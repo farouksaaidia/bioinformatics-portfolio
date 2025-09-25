@@ -1,14 +1,15 @@
 # Genomics Workflows
+
 This folder contains basic genomics workflows:
-- Alignment (BWA + SAMtools)
-- Variant calling (GATK)
-- De novo assembly (SPAdes)
+
+1. Alignment (BWA + SAMtools)
+2. Variant calling (GATK)
+3. De novo assembly (SPAdes)
 
 Each workflow has:
-- **data/**: test datasets (small FASTQ files, reference genome)
-- **scripts/**: executable scripts (.sh)
-- **results/**: output files (BAM, VCF, assemblies)
+- data/: test datasets (FASTQ files, reference genomes)
+- scripts/: executable scripts (.sh)
+- results/: output files (BAM, VCF, assemblies)
 
 ## How to run
-See each script for usage instructions.
-
+See each script inside scripts/ for instructions.
