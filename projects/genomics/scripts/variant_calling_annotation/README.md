@@ -1,28 +1,34 @@
 # Variant Calling & Annotation Scripts
 
-## Included Scripts
+This folder contains scripts for DNA variant calling, annotation, and VCF post-processing.
 
-### Variant Calling
-- call_variants_gatk.sh
-- call_variants_bcftools.sh
-- call_freebayes.sh
+## Variant Calling
+- call_variants_gatk.sh → GATK HaplotypeCaller
+- call_variants_bcftools.sh → bcftools mpileup + call
+- call_freebayes.sh → FreeBayes
+- run_all_callers.sh → Run all callers and produce separate + merged non-redundant VCF
 
-### Annotation
-- annotate_vep.sh
-- annotate_annovar.sh
-- annotate_bcftools_csq.sh
-- annotate_variants_snpeff.sh
+## Annotation
+- annotate_vep.sh → Ensembl VEP
+- annotate_annovar.sh → ANNOVAR
+- annotate_variants_snpeff.sh → SnpEff
+- annotate_bcftools_csq.sh → bcftools CSQ
+- annotate_population_frequency.sh → Add gnomAD / 1000G allele frequencies
+- extract_clinical_variants.sh → ClinVar / COSMIC extraction
+- annotate_conservation_scores.sh → Add GERP / PhyloP scores
+- run_all_annotations.sh → Run all annotators sequentially to produce one fully annotated VCF
 
-### Post-annotation Utilities
-- extract_clinical_variants.sh → Extract variants with clinical significance (ClinVar/COSMIC)
-- annotate_population_frequency.sh → Add population allele frequencies from gnomAD or 1000G
-- annotate_conservation_scores.sh → Add conservation scores (GERP/PhyloP)
+## Post-processing
+- vcf_cleanup.sh → Remove duplicates / low-quality entries
 
-### Pipeline Helpers
-- run_all_callers.sh → Wrapper to call all variant callers on the same BAM
-- run_all_annotations.sh → Wrapper to sequentially annotate a VCF with all annotation tools
-- vcf_cleanup.sh → Cleanup low-quality or duplicate entries from merged VCFs
+## Usage Examples
+\`\`\`bash
+# Run all callers
+./run_all_callers.sh sample.bam reference.fa output_dir
 
-## Notes
-- All scripts take input files as arguments and generate output files.
-- Variant caller choice depends on the use-case; annotations add complementary information.
+# Annotate a VCF
+./run_all_annotations.sh output_dir/merged.vcf.gz output_dir/annotated
+
+# Clean a VCF
+./vcf_cleanup.sh output_dir/annotated/annotated_final.vcf output_dir/annotated/annotated_final_cleaned.vcf
+\`\`\`
