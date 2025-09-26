@@ -1,2 +1,4 @@
 git rm --cached -r projects/genomics/data/real_trial/
 git rm --cached -r projects/genomics/results/real_results/
+*.fastq
+*.fastq.gz
