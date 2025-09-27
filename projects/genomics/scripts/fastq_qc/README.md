@@ -12,21 +12,26 @@
 **Usage examples:**
 
 - Run FastQC on a single sample:
-- bash
+  
+bash
 ./run_fastqc.sh sample_R1.fastq.gz sample_R2.fastq.gz
 
 - Aggregate all FastQC reports with MultiQC:
-```bash
+
+bash
 ./run_multiqc.sh ~/data/fastq_qc_results
 
 - Run FastQC on all samples in a folder:
-```bash
+- 
+bash
 ./run_all_fastqc.sh ~/data/fastq ~/data/fastq_qc_results
 
 - Run trimming for all samples with Trim Galore:
-```bash
+- 
+bash
 ./run_all_trimmers.sh trim_galore ~/data/fastq ~/data/fastq_qc_results
 
 - Run batch trimming for multiple tools:
-```bash
+- 
+bash
 ./run_all_trimmers.sh fastp ~/data/fastq ~/data/fastq_qc_results
