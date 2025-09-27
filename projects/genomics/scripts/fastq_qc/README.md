@@ -12,7 +12,7 @@
 **Usage examples:**
 
 - Run FastQC on a single sample:
-```bash
+  bash
 ./run_fastqc.sh sample_R1.fastq.gz sample_R2.fastq.gz
 
 - Aggregate all FastQC reports with MultiQC:
