@@ -6,7 +6,7 @@
 | run_cutadapt.sh          | Adapter and quality trimming using Cutadapt               | R1/R2 FASTQ                    | Trimmed FASTQ pair             | Specify adapters and min length|
 | run_trimmomatic.sh       | Adapter trimming, quality filtering, paired/unpaired      | R1/R2 FASTQ                    | Paired & unpaired FASTQ       | Standard Trimmomatic params    |
 | run_fastp.sh             | Fast all-in-one trimming and QC                             | R1/R2 FASTQ                    | Trimmed FASTQ pair + HTML report | Fastp default reports          |
-| run_all_fastq_qc.sh      | Batch-run any of the above tools on all samples           | Tool name, input dir, output dir | One folder per sample with results | Wrapper for automation        |
+| run_all_trimmers.sh      | Batch-run any of the above trimming tools on all samples           | Tool name, input dir, output dir | One folder per sample with results | Wrapper for automation        |
 
 **Usage examples:**
 
@@ -20,5 +20,5 @@
 ./run_all_fastq_qc.sh trim_galore ~/data/fastq ~/data/fastq_qc_results
 
 - Run batch trimming for multiple tools:
-./run_all_fastq_qc.sh fastp ~/data/fastq ~/data/fastq_qc_results
+./run_all_trimmers.sh fastp ~/data/fastq ~/data/fastq_qc_results
 " > README.md
