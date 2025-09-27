@@ -22,16 +22,16 @@ bash
 ./run_multiqc.sh ~/data/fastq_qc_results
 
 - Run FastQC on all samples in a folder:
-- 
+ 
 bash
 ./run_all_fastqc.sh ~/data/fastq ~/data/fastq_qc_results
 
 - Run trimming for all samples with Trim Galore:
-- 
+ 
 bash
 ./run_all_trimmers.sh trim_galore ~/data/fastq ~/data/fastq_qc_results
 
 - Run batch trimming for multiple tools:
-- 
+ 
 bash
 ./run_all_trimmers.sh fastp ~/data/fastq ~/data/fastq_qc_results
