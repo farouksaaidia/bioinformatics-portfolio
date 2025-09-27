@@ -15,18 +15,18 @@
 ```bash
 ./run_fastqc.sh sample_R1.fastq.gz sample_R2.fastq.gz
 
-Aggregate all FastQC reports with MultiQC:
-bash
+- Aggregate all FastQC reports with MultiQC:
+```bash
 ./run_multiqc.sh ~/data/fastq_qc_results
 
-Run FastQC on all samples in a folder:
-bash
+- Run FastQC on all samples in a folder:
+```bash
 ./run_all_fastqc.sh ~/data/fastq ~/data/fastq_qc_results
 
-Run trimming for all samples with Trim Galore:
-bash
+- Run trimming for all samples with Trim Galore:
+```bash
 ./run_all_trimmers.sh trim_galore ~/data/fastq ~/data/fastq_qc_results
 
-Run batch trimming for multiple tools:
-bash
+- Run batch trimming for multiple tools:
+```bash
 ./run_all_trimmers.sh fastp ~/data/fastq ~/data/fastq_qc_results
