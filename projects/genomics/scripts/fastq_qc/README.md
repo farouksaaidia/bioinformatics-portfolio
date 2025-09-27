@@ -1,5 +1,3 @@
-echo "# FASTQ QC Scripts
-
 | Script Name              | Description                                                | Input                          | Output                        | Notes / Tool Options             |
 |--------------------------|------------------------------------------------------------|--------------------------------|-------------------------------|---------------------------------|
 | fastqc.sh                | Run FastQC for initial quality assessment                 | R1/R2 FASTQ                    | FastQC HTML and ZIP reports   | Standard FastQC reports         |
