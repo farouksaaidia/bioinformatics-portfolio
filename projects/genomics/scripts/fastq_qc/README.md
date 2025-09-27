@@ -1,6 +1,6 @@
 | Script Name              | Description                                                | Input                          | Output                        | Notes / Tool Options             |
 |--------------------------|------------------------------------------------------------|--------------------------------|-------------------------------|---------------------------------|
-| fastqc.sh                | Run FastQC for initial quality assessment                 | R1/R2 FASTQ                    | FastQC HTML and ZIP reports   | Standard FastQC reports         |
+| run_fastqc.sh                | Run FastQC for initial quality assessment                 | R1/R2 FASTQ                    | FastQC HTML and ZIP reports   | Standard FastQC reports         |
 | run_multiqc.sh           | Aggregate multiple FastQC reports into a single report    | Folder of FastQC outputs       | MultiQC HTML report           | Provides summary across samples|
 | run_trim_galore.sh       | Trim adapters and low-quality bases using Trim Galore      | R1/R2 FASTQ                    | Trimmed FASTQ pair             | Default Trim Galore parameters |
 | run_cutadapt.sh          | Adapter and quality trimming using Cutadapt               | R1/R2 FASTQ                    | Trimmed FASTQ pair             | Specify adapters and min length|
