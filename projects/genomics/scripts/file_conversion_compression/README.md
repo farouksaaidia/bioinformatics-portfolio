@@ -22,7 +22,7 @@ These tools are essential in every bioinformatics workflow to ensure **data effi
 ---
 
 
-##📝 Notes & Best Practices
+## 📝 Notes & Best Practices
 Always sort and index BAM files before running downstream analysis (variant calling, IGV).
 
 Use bgzip + tabix for all large genomic files (VCF, BED, GFF) if you plan region-based queries.
