@@ -21,12 +21,6 @@ These tools are essential in every bioinformatics workflow to ensure **data effi
 
 ---
 
-## 🚀 Usage
-
-1. Make scripts executable once (if not already):
-   ```bash
-   chmod +x *.sh
-Run the script with its required arguments (examples in table above).
 
 📝 Notes & Best Practices
 Always sort and index BAM files before running downstream analysis (variant calling, IGV).
