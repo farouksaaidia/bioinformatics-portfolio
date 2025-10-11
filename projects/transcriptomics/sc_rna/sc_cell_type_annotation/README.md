@@ -144,6 +144,9 @@ projects/transcriptomics/sc_rna/sc_cell_type_annotation/export_annotated_objects
 
 ---
 
-## 🧾 Citation / Acknowledgment
-If you use this annotation module or derivative workflows, please credit **Farouk Saaidia – Brenus Pharma / Bioinformatics Portfolio (2025)**.
+## 🧾 Attribution
+Created and maintained by **Farouk Saaidia (2025)**.  
+For academic or collaborative use, please cite this module as:
+
+> Saaidia F. (2025). *Single-cell RNA annotation toolkit – sc_cell_type_annotation module.*
 
