@@ -12,12 +12,35 @@ option_list <- list(
 opt <- parse_args(OptionParser(option_list=option_list))
 if (is.null(opt$input) || is.null(opt$output)) stop("❌ Provide both --input and --output")
 
-dir.create(opt$output, showWarnings=FALSE, recursive=TRUE)
-seurat_obj <- readRDS(opt$input)
+if (!file.exists(opt$input)) stop(paste0("❌ Input file not found: ", opt$input))
 
+dir.create(opt$output, showWarnings=FALSE, recursive=TRUE)
+
+message("📂 Loading Seurat object...")
+seurat_obj <- tryCatch(readRDS(opt$input),
+                       error = function(e) stop(paste0("❌ Failed to read RDS: ", e)))
+
+# Determine which metadata column holds cell type labels
+ct_cols <- c("predicted_cell_type", "cell_type", "predicted_labels")
+found_col <- intersect(ct_cols, colnames(seurat_obj@meta.data))
+if (length(found_col) == 0) {
+  stop("❌ No cell type column found in metadata. Expected one of: predicted_cell_type, cell_type, predicted_labels")
+}
+ct_col <- found_col[1]
+message(paste0("ℹ️ Using metadata column for cell types: ", ct_col))
+
+# Basic counts table
+counts_tbl <- table(seurat_obj[[ct_col]])
+write.csv(as.data.frame(counts_tbl), file = file.path(opt$output, "cell_type_counts.csv"), row.names = TRUE)
+
+# DimPlot (wrap in tryCatch to avoid crashing)
 pdf(file.path(opt$output, "annotation_summary.pdf"))
-print(DimPlot(seurat_obj, group.by="cell_type", label=TRUE) + ggtitle("Cell Type Annotation"))
+tryCatch({
+  p <- DimPlot(seurat_obj, group.by = ct_col, label = TRUE) + ggtitle("Cell Type Annotation")
+  print(p)
+}, error = function(e) {
+  message(paste0("⚠️ Failed to generate DimPlot: ", e))
+})
 dev.off()
 
-write.csv(table(seurat_obj$cell_type), file=file.path(opt$output, "cell_type_counts.csv"))
-cat("✅ Report generated in", opt$output, "\n")
+message(paste0("✅ Report generated in ", opt$output))
