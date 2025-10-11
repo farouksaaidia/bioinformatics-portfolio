@@ -1,64 +1,61 @@
 #!/usr/bin/env python3
 """
-Compare cell-type annotations between two methods.
+Compare two annotation CSVs and compute metrics.
+Assumes both CSVs have a shared cell identifier column (default: cell_id) and a label column (default: cell_type).
 Outputs:
- - <output>_confusion.csv (cross-tabulation)
- - <output>_metrics.txt (ARI and basic stats)
-Requirements: pandas, scikit-learn
+- {output}_confusion.csv
+- {output}_metrics.txt (ARI, AMI, counts)
 """
 import pandas as pd
 import argparse
 import sys
+from sklearn.metrics import adjusted_rand_score, adjusted_mutual_info_score
 import os
-from sklearn.metrics import adjusted_rand_score
 
 parser = argparse.ArgumentParser(description="Compare cell-type annotations between methods.")
-parser.add_argument("-a", "--annot1", required=True, help="CSV with annotations from method 1 (must include cell_id and cell_type columns unless --id-col/--type-col provided)")
-parser.add_argument("-b", "--annot2", required=True, help="CSV with annotations from method 2")
+parser.add_argument("-a", "--annot1", required=True, help="CSV with cluster annotations from method 1")
+parser.add_argument("-b", "--annot2", required=True, help="CSV with cluster annotations from method 2")
 parser.add_argument("-o", "--output", required=True, help="Output comparison results file prefix")
-parser.add_argument("--id-col", default="cell_id", help="Column name for cell identifier (default: cell_id)")
-parser.add_argument("--type-col", default="cell_type", help="Column name for annotation label (default: cell_type)")
+parser.add_argument("--id_col", default="cell_id", help="Column name for cell IDs (default: cell_id)")
+parser.add_argument("--label_col", default="cell_type", help="Column name for labels (default: cell_type)")
 args = parser.parse_args()
 
-def load_csv(path):
-    if not os.path.exists(path):
-        sys.exit(f"❌ File not found: {path}")
-    try:
-        return pd.read_csv(path)
-    except Exception as e:
-        sys.exit(f"❌ Failed to read {path}: {e}")
+for f in [args.annot1, args.annot2]:
+    if not os.path.exists(f):
+        sys.exit(f"❌ Input file {f} not found")
 
-ann1 = load_csv(args.annot1)
-ann2 = load_csv(args.annot2)
+try:
+    ann1 = pd.read_csv(args.annot1)
+    ann2 = pd.read_csv(args.annot2)
+except Exception as e:
+    sys.exit(f"❌ Failed to load input files: {e}")
 
-if args.id_col not in ann1.columns or args.type_col not in ann1.columns:
-    sys.exit(f"❌ annot1 must contain columns: {args.id_col}, {args.type_col}")
-if args.id_col not in ann2.columns or args.type_col not in ann2.columns:
-    sys.exit(f"❌ annot2 must contain columns: {args.id_col}, {args.type_col}")
+if args.id_col not in ann1.columns or args.id_col not in ann2.columns:
+    sys.exit(f"❌ id_col '{args.id_col}' not found in both files")
 
-# Merge on cell id
-merged = pd.merge(ann1[[args.id_col, args.type_col]], ann2[[args.id_col, args.type_col]],
-                  on=args.id_col, suffixes=("_m1", "_m2"), how="inner")
+if args.label_col not in ann1.columns or args.label_col not in ann2.columns:
+    sys.exit(f"❌ label_col '{args.label_col}' not found in both files")
 
+merged = pd.merge(ann1[[args.id_col, args.label_col]], ann2[[args.id_col, args.label_col]],
+                  on=args.id_col, suffixes=("_m1", "_m2"))
 if merged.empty:
-    sys.exit("❌ No overlapping cell IDs found between the two annotation files.")
+    sys.exit("❌ No matching cell IDs found between files after merge")
 
-# Compute ARI
-ari = adjusted_rand_score(merged[f"{args.type_col}_m1"], merged[f"{args.type_col}_m2"])
+# compute metrics
+ari = adjusted_rand_score(merged[f"{args.label_col}_m1"], merged[f"{args.label_col}_m2"])
+ami = adjusted_mutual_info_score(merged[f"{args.label_col}_m1"], merged[f"{args.label_col}_m2"])
 
-# Confusion matrix (cross-tab)
-confmat = pd.crosstab(merged[f"{args.type_col}_m1"], merged[f"{args.type_col}_m2"])
+confmat = pd.crosstab(merged[f"{args.label_col}_m1"], merged[f"{args.label_col}_m2"])
 
-# Save outputs
-conf_csv = f"{args.output}_confusion.csv"
-metrics_txt = f"{args.output}_metrics.txt"
+confmat.to_csv(f"{args.output}_confusion.csv")
 
-confmat.to_csv(conf_csv)
-with open(metrics_txt, "w") as f:
-    f.write(f"Adjusted Rand Index: {ari:.4f}\n")
-    f.write(f"Method1 annotations: {merged[f'{args.type_col}_m1'].nunique()} classes\n")
-    f.write(f"Method2 annotations: {merged[f'{args.type_col}_m2'].nunique()} classes\n")
-    f.write(f"Compared cells (overlap): {len(merged)}\n")
+with open(f"{args.output}_metrics.txt", "w") as f:
+    f.write(f"Adjusted Rand Index (ARI): {ari:.6f}\n")
+    f.write(f"Adjusted Mutual Information (AMI): {ami:.6f}\n")
+    f.write(f"Total cells compared: {len(merged)}\n")
+    f.write("\n# Label counts method1\n")
+    f.write(merged[f"{args.label_col}_m1"].value_counts().to_string())
+    f.write("\n\n# Label counts method2\n")
+    f.write(merged[f"{args.label_col}_m2"].value_counts().to_string())
 
-print(f"✅ Comparison complete. ARI={ari:.4f}")
-print(f"Outputs written: {conf_csv}, {metrics_txt}")
+print(f"✅ Comparison complete. ARI={ari:.6f}, AMI={ami:.6f}. Outputs: {args.output}_confusion.csv and {args.output}_metrics.txt")

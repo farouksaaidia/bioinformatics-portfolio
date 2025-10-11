@@ -2,13 +2,8 @@
 set -euo pipefail
 
 usage() {
-  cat <<USAGE
-Usage: $0 -r <input_rds> -h <input_h5ad> -o <output_dir>
-
-Copies annotated Seurat (.rds) and Scanpy (.h5ad) objects into an output directory.
-Examples:
-  $0 -r results/annotated_seurat.rds -h results/annotated_scanpy.h5ad -o exports/
-USAGE
+  echo "Usage: $0 -r <input_rds> -h <input_h5ad> -o <output_dir>"
+  echo "Either -r or -h must be provided (or both)."
   exit 1
 }
 
@@ -25,25 +20,38 @@ while getopts "r:h:o:" opt; do
   esac
 done
 
-if [[ -z "${OUTDIR}" ]]; then
-  echo "❌ Missing -o <output_dir>"
+if [[ -z "${RDS}" && -z "${H5AD}" ]]; then
+  echo "❌ Provide at least -r or -h"
   usage
 fi
 
-mkdir -p "$OUTDIR"
+if [[ -z "${OUTDIR}" ]]; then
+  echo "❌ Provide -o <output_dir>"
+  usage
+fi
+
+mkdir -p "${OUTDIR}"
+
+manifest="${OUTDIR}/export_manifest.tsv"
+echo -e "source\tfilename\tsize_bytes" > "${manifest}"
 
 if [[ -n "${RDS}" && -f "${RDS}" ]]; then
-  cp "$RDS" "$OUTDIR/annotated_seurat.rds"
-  echo "✅ Exported annotated Seurat object to $OUTDIR/annotated_seurat.rds"
-else
-  echo "⚠️ Seurat RDS not provided or not found: ${RDS}"
+  cp "${RDS}" "${OUTDIR}/annotated_seurat.rds"
+  sz=$(stat -c%s "${OUTDIR}/annotated_seurat.rds")
+  echo -e "${RDS}\tannotated_seurat.rds\t${sz}" >> "${manifest}"
+  echo "✅ Exported annotated Seurat object to ${OUTDIR}/annotated_seurat.rds"
+elif [[ -n "${RDS}" ]]; then
+  echo "⚠️ RDS file not found: ${RDS}"
 fi
 
 if [[ -n "${H5AD}" && -f "${H5AD}" ]]; then
-  cp "$H5AD" "$OUTDIR/annotated_scanpy.h5ad"
-  echo "✅ Exported annotated Scanpy object to $OUTDIR/annotated_scanpy.h5ad"
-else
-  echo "⚠️ Scanpy H5AD not provided or not found: ${H5AD}"
+  cp "${H5AD}" "${OUTDIR}/annotated_scanpy.h5ad"
+  sz=$(stat -c%s "${OUTDIR}/annotated_scanpy.h5ad")
+  echo -e "${H5AD}\tannotated_scanpy.h5ad\t${sz}" >> "${manifest}"
+  echo "✅ Exported annotated Scanpy object to ${OUTDIR}/annotated_scanpy.h5ad"
+elif [[ -n "${H5AD}" ]]; then
+  echo "⚠️ H5AD file not found: ${H5AD}"
 fi
 
-echo "✅ Export step finished."
+echo "📄 Manifest saved to ${manifest}"
+echo "✅ Export complete."

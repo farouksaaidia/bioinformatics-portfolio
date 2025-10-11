@@ -3,44 +3,61 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
   library(optparse)
+  library(scales)
 })
 
 option_list <- list(
   make_option(c("-i", "--input"), type="character", help="Input annotated Seurat .rds file"),
-  make_option(c("-o", "--output"), type="character", help="Output directory for plots and tables")
+  make_option(c("-o", "--output"), type="character", help="Output directory for plots and tables"),
+  make_option(c("-g", "--group_by"), type="character", default="predicted_cell_type", help="Metadata column to summarize (default: predicted_cell_type)"),
+  make_option(c("--umap_key"), type="character", default="umap", help="Reductions key for UMAP (default: umap)")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 if (is.null(opt$input) || is.null(opt$output)) stop("❌ Provide both --input and --output")
 
-if (!file.exists(opt$input)) stop(paste0("❌ Input file not found: ", opt$input))
-
 dir.create(opt$output, showWarnings=FALSE, recursive=TRUE)
+seurat_obj <- readRDS(opt$input)
 
-message("📂 Loading Seurat object...")
-seurat_obj <- tryCatch(readRDS(opt$input),
-                       error = function(e) stop(paste0("❌ Failed to read RDS: ", e)))
-
-# Determine which metadata column holds cell type labels
-ct_cols <- c("predicted_cell_type", "cell_type", "predicted_labels")
-found_col <- intersect(ct_cols, colnames(seurat_obj@meta.data))
-if (length(found_col) == 0) {
-  stop("❌ No cell type column found in metadata. Expected one of: predicted_cell_type, cell_type, predicted_labels")
+if (!(opt$group_by %in% colnames(seurat_obj@meta.data))) {
+  stop(paste0("❌ Metadata column '", opt$group_by, "' not found in Seurat object."))
 }
-ct_col <- found_col[1]
-message(paste0("ℹ️ Using metadata column for cell types: ", ct_col))
 
-# Basic counts table
-counts_tbl <- table(seurat_obj[[ct_col]])
-write.csv(as.data.frame(counts_tbl), file = file.path(opt$output, "cell_type_counts.csv"), row.names = TRUE)
+# Safe plotting: check if UMAP exists, otherwise attempt to run RunUMAP if possible
+if (! ("umap" %in% names(seurat_obj@reductions)) && ! (opt$umap_key %in% names(seurat_obj@reductions))) {
+  message("⚠️ UMAP reduction not found. Attempting to compute a quick UMAP (requires PCA).")
+  if (! ("pca" %in% names(seurat_obj@reductions))) {
+    message("⚠️ PCA not found. Skipping UMAP plot.")
+    generate_umap <- FALSE
+  } else {
+    seurat_obj <- tryCatch({
+      RunUMAP(seurat_obj, reduction = "pca", dims = 1:20, verbose = FALSE)
+    }, error = function(e) { message("⚠️ UMAP computation failed: ", e$message); seurat_obj })
+    generate_umap <- "umap" %in% names(seurat_obj@reductions)
+  }
+} else {
+  generate_umap <- TRUE
+}
 
-# DimPlot (wrap in tryCatch to avoid crashing)
-pdf(file.path(opt$output, "annotation_summary.pdf"))
-tryCatch({
-  p <- DimPlot(seurat_obj, group.by = ct_col, label = TRUE) + ggtitle("Cell Type Annotation")
-  print(p)
-}, error = function(e) {
-  message(paste0("⚠️ Failed to generate DimPlot: ", e))
-})
+pdf(file.path(opt$output, "annotation_summary.pdf"), width = 8, height = 6)
+if (generate_umap) {
+  print(DimPlot(seurat_obj, reduction = opt$umap_key, group.by = opt$group_by, label = TRUE) + ggtitle("Cell Type Annotation"))
+} else {
+  plot.new()
+  title("UMAP not available - see logs")
+}
 dev.off()
 
-message(paste0("✅ Report generated in ", opt$output))
+# Barplot of counts
+counts_df <- as.data.frame(table(seurat_obj@meta.data[[opt$group_by]]))
+colnames(counts_df) <- c("cell_type", "count")
+png(filename = file.path(opt$output, "cell_type_counts_barplot.png"), width = 1000, height = 600)
+print(ggplot(counts_df, aes(x = reorder(cell_type, -count), y = count)) +
+        geom_bar(stat = "identity") +
+        coord_flip() +
+        xlab("") + ylab("Cell count") +
+        ggtitle("Cell counts per annotated cell type") +
+        theme_minimal())
+dev.off()
+
+write.csv(counts_df, file = file.path(opt$output, "cell_type_counts.csv"), row.names = FALSE)
+message("✅ Report generated in ", opt$output)
