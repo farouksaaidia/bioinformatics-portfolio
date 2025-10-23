@@ -20,26 +20,41 @@ Raw spatial transcriptomics data (e.g., 10X Visium)
 ├──▶ sp_preprocessing → Load, format, and align raw data & histology
 
 │
+
 ├──▶ sp_qc → Perform quality control on spots & coverage
+
 │
+
 ├──▶ sp_normalization → Normalize counts, scale data, and deconvolve spots
+
 │
+
 ├──▶ sp_dimensionality_reduction → Compute spatially aware PCA/UMAP embeddings
+
 │
+
 ├──▶ sp_clustering → Identify tissue domains or regions
+
 │
+
 ├──▶ sp_cell_type_mapping → Map scRNA-defined cell types onto spatial data
+
 │
+
 ├──▶ sp_differential_expression → Identify region-specific markers & pathways
+
 │
+
 ├──▶ sp_spatial_inference → Infer cell-cell communication and spatial signaling
+
 │
+
 ├──▶ sp_integration → Integrate multiple slides or modalities (spatial + scRNA)
+
 │
+
 └──▶ sp_visualization → Generate final plots, interactive dashboards, and reports
 
-yaml
-Copy code
 
 ---
 
