@@ -16,9 +16,9 @@ It mirrors the `sc_rna` pipeline but adds spatial coordinates, histology alignme
 
 Raw spatial transcriptomics data (e.g., 10X Visium)
 │
----
+
 ├──▶ sp_preprocessing → Load, format, and align raw data & histology
----
+
 │
 ├──▶ sp_qc → Perform quality control on spots & coverage
 │
